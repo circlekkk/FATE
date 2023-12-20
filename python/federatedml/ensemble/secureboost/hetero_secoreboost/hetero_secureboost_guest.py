@@ -23,6 +23,8 @@ from federatedml.ensemble.secureboost.secureboost_util.boosting_tree_predict imp
 from federatedml.ensemble.secureboost.secureboost_util.subsample import goss_sampling
 
 
+
+
 class HeteroSecureBoostingTreeGuest(HeteroBoostingGuest):
 
     def __init__(self):
@@ -93,7 +95,10 @@ class HeteroSecureBoostingTreeGuest(HeteroBoostingGuest):
         self.multi_mode = param.multi_mode
 
     def process_sample_weights(self, grad_and_hess, data_with_sample_weight=None):
-
+        # LOGGER.info('type grad_and_hess is{}'.format(
+        #     type(grad_and_hess)))  # ,'grad_and_hess  head 3 is {}'.format(grad_and_hess.head(3)))
+        # LOGGER.info('type data_with_sample_weight is{}'.format(type(
+        #     data_with_sample_weight)))  ##,'data_with_sample_weight  head 3 is {}'.format(data_with_sample_weight.head(3)))
         # add sample weights to gradient and hessian
         if data_with_sample_weight is not None:
             if with_weight(data_with_sample_weight):
@@ -350,7 +355,7 @@ class HeteroSecureBoostingTreeGuest(HeteroBoostingGuest):
                 self.booster_dim,
                 predict_cache,
                 pred_leaf=(
-                    ret_format == 'leaf'))
+                        ret_format == 'leaf'))
         else:
             if self.EINI_inference and not self.on_training:  # EINI is for inference stage
                 sitename = self.role + ':' + str(self.component_properties.local_partyid)

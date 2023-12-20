@@ -94,17 +94,25 @@ class HeteroSecureBoostingTreeGuest(HeteroBoostingGuest):
 
     def process_sample_weights(self, grad_and_hess, data_with_sample_weight=None):
         """
-        这个方法的作用是处理样本权重（sample weights）。样本权重是机器学习中一个常用的概念，它表示每个样本对模型更新的影响程度。
-        @param grad_and_hess:
-        @param data_with_sample_weight:
+        这个方法的作用是处理样本权重（sample weights）。
+        样本权重是机器学习中一个常用的概念，它表示每个样本对模型更新的影响程度。
+        超参有：正样本权重，负样本权重
+
+        @param grad_and_hess:G和H
+        @param data_with_sample_weight:包含样本权重的数据.original input data
         @return:
+        stateless:grad_and_hess作为csv入参。data_with_sample_weight是带权重的样本，是csv?。
         """
         # add sample weights to gradient and hessian
         if data_with_sample_weight is not None:
+            # 如果有样本权重不是None,即需要处理
             if with_weight(data_with_sample_weight):
+                # 如果data_with_sample_weight样本数据的权重不为None,则有权重
                 LOGGER.info('weighted sample detected, multiply g/h by weights')
+                # 检测到加权样本，将g/h乘以权重
                 grad_and_hess = grad_and_hess.join(data_with_sample_weight,
                                                    lambda v1, v2: (v1[0] * v2.weight, v1[1] * v2.weight))
+                # 将grad_and_hess与data_with_sample_weight合并。合并的方式是，对于每一对数据，它都将grad_and_hess中的每个元素（梯度和海森矩阵）乘以相应的权重
                 if not self.max_sample_weight_computed:
                     self.max_sample_weight = get_max_sample_weight(data_with_sample_weight)
                     LOGGER.info('max sample weight is {}'.format(self.max_sample_weight))

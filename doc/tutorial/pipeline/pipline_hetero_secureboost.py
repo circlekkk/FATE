@@ -12,10 +12,10 @@ def train_pipeline():
     reader_0 = Reader(name="reader_0")
     # set guest parameter
     reader_0.get_party_instance(role='guest', party_id=9999).component_param(
-        table={"name": "breast_hetero_guest", "namespace": "experiment"})
+        table={"name": "5_hetero_guest", "namespace": "experiment"})
     # set host parameter
     reader_0.get_party_instance(role='host', party_id=10000).component_param(
-        table={"name": "breast_hetero_host", "namespace": "experiment"})
+        table={"name": "5_hetero_host", "namespace": "experiment"})
     # 添加DataTransform组件以将原始数据解析到数据实例中
     data_transform_0 = DataTransform(name="data_transform_0")
     # set guest parameter
@@ -72,8 +72,7 @@ def predict_pipeline():
     predict_pipeline.predict()
 
 if __name__=='__main__':
-    # train_pipeline()
-    predict_pipeline()
+    train_pipeline()
 
 
 
