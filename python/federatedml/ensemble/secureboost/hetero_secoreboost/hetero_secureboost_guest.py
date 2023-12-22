@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from operator import itemgetter
 from federatedml.util import consts
@@ -95,17 +97,15 @@ class HeteroSecureBoostingTreeGuest(HeteroBoostingGuest):
         self.multi_mode = param.multi_mode
 
     def process_sample_weights(self, grad_and_hess, data_with_sample_weight=None):
-        # LOGGER.info('type grad_and_hess is{}'.format(
-        #     type(grad_and_hess)))  # ,'grad_and_hess  head 3 is {}'.format(grad_and_hess.head(3)))
-        # LOGGER.info('type data_with_sample_weight is{}'.format(type(
-        #     data_with_sample_weight)))  ##,'data_with_sample_weight  head 3 is {}'.format(data_with_sample_weight.head(3)))
         # add sample weights to gradient and hessian
+        LOGGER.info('11111')
         if data_with_sample_weight is not None:
             if with_weight(data_with_sample_weight):
                 LOGGER.info('weighted sample detected, multiply g/h by weights')
                 grad_and_hess = grad_and_hess.join(data_with_sample_weight,
                                                    lambda v1, v2: (v1[0] * v2.weight, v1[1] * v2.weight))
                 if not self.max_sample_weight_computed:
+                    # 如果没有计算过最大样本权重
                     self.max_sample_weight = get_max_sample_weight(data_with_sample_weight)
                     LOGGER.info('max sample weight is {}'.format(self.max_sample_weight))
                     self.max_sample_weight_computed = True
@@ -132,9 +132,20 @@ class HeteroSecureBoostingTreeGuest(HeteroBoostingGuest):
             assert host_num == 1, 'only 1 host party is allowed in layered mode'
 
     def compute_grad_and_hess(self, y_hat, y, data_with_sample_weight=None):
+        """
 
+        @param y_hat: 当前预测值，一个csv
+        @param y:真实值
+        @param data_with_sample_weight:
+        @return:
+        """
         LOGGER.info("compute grad and hess")
+        # LOGGER.info(f"##### y  is :{y.take(5)}")
+        # LOGGER.info(f"##### y_hat  is :{y_hat.take(5)}")
+        tmp=data_with_sample_weight.first()[1]
+        LOGGER.info(f"#####11111 data_with_sample_weight head 1 is :{tmp},{tmp.features},{tmp.weight}")
         loss_method = self.loss
+        # LOGGER.info(f"#####11111loss{self.loss}")
         if self.task_type == consts.CLASSIFICATION:
             grad_and_hess = y.join(y_hat, lambda y, f_val:
                                    (loss_method.compute_grad(y, loss_method.predict(f_val)),
@@ -145,7 +156,8 @@ class HeteroSecureBoostingTreeGuest(HeteroBoostingGuest):
                                     loss_method.compute_hess(y, f_val)))
 
         grad_and_hess = self.process_sample_weights(grad_and_hess, data_with_sample_weight)
-
+        tmp2=(grad_and_hess).first()[1]
+        LOGGER.info(f"#####11111 grad and hess head 1 is :{tmp2}")
         return grad_and_hess
 
     @staticmethod
